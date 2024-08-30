@@ -118,10 +118,6 @@ const FileUpload = ({
     setCapturing(false);
   };
 
-  const handleDeviceChange = (event) => {
-    setSelectedDeviceId(event.target.value);
-  };
-
   const rotateCamera = () => {
     const currentIndex = devices.findIndex(
       (device) => device.deviceId === selectedDeviceId
@@ -134,26 +130,6 @@ const FileUpload = ({
     <>
       {!capturing && !capturedImage && (
         <div className={styles.fileUploadContainer}>
-          {/* Existing UI */}
-          {!capturing && !capturedImage && isEdit && devices.length > 1 && (
-            <div className={styles.deviceSelector}>
-              <label htmlFor="camera">Select Camera: </label>
-              <select
-                id="camera"
-                value={selectedDeviceId}
-                onChange={handleDeviceChange}
-              >
-                {devices.map((device) => (
-                  <option key={device.deviceId} value={device.deviceId}>
-                    {device.label || `Camera ${device.deviceId}`}
-                  </option>
-                ))}
-              </select>
-              <button onClick={rotateCamera} className={styles.rotate}>
-                <PiCameraRotate size={16} /> Rotate Camera
-              </button>
-            </div>
-          )}
           {/* Camera capture UI */}
           {!capturing && !capturedImage && isEdit && (
             <div className={styles.cameraUpload}>
@@ -170,6 +146,9 @@ const FileUpload = ({
           <div className={styles.captureActions}>
             <button onClick={closeCamera} className={styles.retake}>
               <IoMdArrowBack size={16} /> Back
+            </button>
+            <button onClick={rotateCamera} className={styles.proceed}>
+              <PiCameraRotate size={16} /> Rotate Camera
             </button>
             <button onClick={capturePhoto} className={styles.proceed}>
               <MdOutlineCameraAlt size={16} /> Capture Photo
