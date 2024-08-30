@@ -41,14 +41,28 @@ const FileUpload = ({
     if (uploadedImages.length >= maxFilesPerCategory) {
       return;
     }
-    setCapturing(true);
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: {
-        deviceId: selectedDeviceId ? { exact: selectedDeviceId } : undefined,
-      },
-    });
-    videoRef.current.srcObject = stream;
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          deviceId: selectedDeviceId ? { exact: selectedDeviceId } : undefined,
+        },
+      });
+      videoRef.current.srcObject = stream;
+      setCapturing(true);
+    } catch (error) {
+      if (error.name === "NotAllowedError") {
+        alert(
+          "Camera access is required to capture a photo. Please grant permission."
+        );
+      } else if (error.name === "NotFoundError") {
+        alert("No camera device found. Please connect a camera.");
+      } else {
+        alert("An unexpected error occurred while accessing the camera.");
+      }
+    }
   };
+
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
     if (files.length + uploadedImages.length > maxFilesPerCategory) {
