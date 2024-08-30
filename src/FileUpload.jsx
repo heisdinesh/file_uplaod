@@ -18,7 +18,7 @@ const FileUpload = ({
   const [capturedImage, setCapturedImage] = useState(null);
   const [rotation, setRotation] = useState(0);
   const [devices, setDevices] = useState([]);
-  const [selectedDeviceId, setSelectedDeviceId] = useState(null);
+  const [selectedDeviceIndex, setSelectedDeviceIndex] = useState(0);
 
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
@@ -31,8 +31,13 @@ const FileUpload = ({
         (device) => device.kind === "videoinput"
       );
       setDevices(videoDevices);
+
       if (videoDevices.length > 0) {
-        setSelectedDeviceId(videoDevices[0].deviceId); // Set default to first camera
+        // Default to the back camera if available
+        const backCameraIndex = videoDevices.findIndex((device) =>
+          device.label.toLowerCase().includes("back")
+        );
+        setSelectedDeviceIndex(backCameraIndex >= 0 ? backCameraIndex : 0);
       }
     });
   }, []);
@@ -42,7 +47,7 @@ const FileUpload = ({
     if (capturing && videoRef.current) {
       startCapture();
     }
-  }, [capturing]);
+  }, [capturing, selectedDeviceIndex]);
 
   const startCapture = async () => {
     if (uploadedImages.length >= maxFilesPerCategory) {
@@ -52,7 +57,9 @@ const FileUpload = ({
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
-          deviceId: selectedDeviceId ? { exact: selectedDeviceId } : undefined,
+          deviceId: devices[selectedDeviceIndex]?.deviceId
+            ? { exact: devices[selectedDeviceIndex].deviceId }
+            : undefined,
         },
       });
 
@@ -118,35 +125,14 @@ const FileUpload = ({
     setCapturing(false);
   };
 
-  const handleDeviceChange = (event) => {
-    setSelectedDeviceId(event.target.value);
-  };
-
-  const rotateImage = () => {
-    setRotation((prevRotation) => (prevRotation + 90) % 360); // Rotate by 90 degrees
+  const rotateCamera = () => {
+    setSelectedDeviceIndex((prevIndex) => (prevIndex + 1) % devices.length);
   };
 
   return (
     <>
       {!capturing && !capturedImage && (
         <div className={styles.fileUploadContainer}>
-          {/* Existing UI */}
-          {!capturing && !capturedImage && isEdit && devices.length > 1 && (
-            <div className={styles.deviceSelector}>
-              <label htmlFor="camera">Select Camera: </label>
-              <select
-                id="camera"
-                value={selectedDeviceId}
-                onChange={handleDeviceChange}
-              >
-                {devices.map((device) => (
-                  <option key={device.deviceId} value={device.deviceId}>
-                    {device.label || `Camera ${device.deviceId}`}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
           {/* Camera capture UI */}
           {!capturing && !capturedImage && isEdit && (
             <div className={styles.cameraUpload}>
@@ -167,6 +153,11 @@ const FileUpload = ({
             <button onClick={capturePhoto} className={styles.proceed}>
               <MdOutlineCameraAlt size={16} /> Capture Photo
             </button>
+            {devices.length > 1 && (
+              <button onClick={rotateCamera} className={styles.rotate}>
+                <PiCameraRotate size={16} /> Switch Camera
+              </button>
+            )}
           </div>
           <canvas ref={canvasRef} style={{ display: "none" }} />
         </div>
@@ -186,9 +177,7 @@ const FileUpload = ({
             >
               <CiRedo size={16} /> Retake
             </button>
-            <button className={styles.rotate} onClick={rotateImage}>
-              <PiCameraRotate size={16} /> Rotate
-            </button>
+
             <button
               className={styles.proceed}
               onClick={() => {
