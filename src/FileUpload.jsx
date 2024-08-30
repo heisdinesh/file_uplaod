@@ -23,6 +23,7 @@ const FileUpload = ({
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const inputFileRef = useRef(null);
+  const currentStream = useRef(null); // Keep track of the current stream
 
   useEffect(() => {
     // Get available video devices (cameras)
@@ -49,6 +50,11 @@ const FileUpload = ({
       return;
     }
 
+    // Stop any existing stream
+    if (currentStream.current) {
+      currentStream.current.getTracks().forEach((track) => track.stop());
+    }
+
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
@@ -59,6 +65,7 @@ const FileUpload = ({
       // Ensure the video element is available
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
+        currentStream.current = stream; // Update the current stream reference
       } else {
         // Handle the case where the video element is not ready
         console.error("Video element is not available yet.");
@@ -119,6 +126,15 @@ const FileUpload = ({
   };
 
   const rotateCamera = () => {
+    if (devices.length <= 1) {
+      return; // No rotation if only one camera is available
+    }
+
+    // Stop the current stream before switching cameras
+    if (currentStream.current) {
+      currentStream.current.getTracks().forEach((track) => track.stop());
+    }
+
     const currentIndex = devices.findIndex(
       (device) => device.deviceId === selectedDeviceId
     );
@@ -147,7 +163,13 @@ const FileUpload = ({
             <button onClick={closeCamera} className={styles.retake}>
               <IoMdArrowBack size={16} /> Back
             </button>
-            <button onClick={rotateCamera} className={styles.proceed}>
+            <button
+              onClick={rotateCamera}
+              className={`${styles.proceed} ${
+                devices.length <= 1 ? styles.disabled : ""
+              }`}
+              disabled={devices.length <= 1}
+            >
               <PiCameraRotate size={16} /> Rotate Camera
             </button>
             <button onClick={capturePhoto} className={styles.proceed}>
