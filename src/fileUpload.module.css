@@ -1,0 +1,131 @@
+.fileUploadContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid #5a5b60;
+  background: rgba(13, 13, 14, 0.4);
+  color: #f1f1f1;
+  input {
+    display: none;
+  }
+
+  .files {
+    overflow-y: auto;
+    height: 62px;
+  }
+
+  .fileNames {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+
+    .fileName {
+      display: flex;
+      align-items: center;
+      padding: 1px 4px;
+      border-radius: 2px;
+      border: 1px solid #5a5b60;
+
+      a {
+        white-space: nowrap;
+        overflow: hidden;
+        color: #9b9b9b;
+        text-overflow: ellipsis;
+        max-width: 120px;
+        margin: 0;
+      }
+      .remove {
+        background: none;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+      }
+    }
+  }
+
+  .fileUpload {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+
+    .fileUploadMore {
+      display: flex;
+      align-items: center;
+    }
+
+    input {
+      display: none;
+    }
+  }
+
+  h2 {
+    color: #d9dbde;
+    font-size: 22px;
+    font-weight: 200;
+    line-height: 20px;
+
+    span {
+      font-size: 24px;
+      font-weight: 400;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+  }
+}
+
+.cameraUpload {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+
+  video {
+    width: 100%;
+  }
+  canvas {
+    display: none;
+  }
+
+  .capturedImage {
+    width: 100%;
+  }
+
+  button {
+    border: 1px solid;
+    background-color: #f1f1f1;
+    color: black;
+    border-radius: 6px;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    cursor: pointer;
+    width: 100%;
+
+    &.retake {
+      background-color: transparent;
+      color: #f1f1f1;
+    }
+  }
+}
+
+.captureActions {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  .proceed {
+    width: 50%;
+  }
+
+  .retake {
+    width: 50%;
+  }
+}
