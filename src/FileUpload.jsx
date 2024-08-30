@@ -16,7 +16,7 @@ const FileUpload = ({
   const [uploadedImages, setUploadedImages] = useState(images);
   const [capturing, setCapturing] = useState(false);
   const [capturedImage, setCapturedImage] = useState(null);
-  const [rotation, setRotation] = useState(0); // State to track rotation
+  const [rotation, setRotation] = useState(0);
   const [devices, setDevices] = useState([]);
   const [selectedDeviceId, setSelectedDeviceId] = useState(null);
 
@@ -37,6 +37,13 @@ const FileUpload = ({
     });
   }, []);
 
+  useEffect(() => {
+    // Start capturing when the video element is rendered
+    if (capturing && videoRef.current) {
+      startCapture();
+    }
+  }, [capturing]);
+
   const startCapture = async () => {
     if (uploadedImages.length >= maxFilesPerCategory) {
       return;
@@ -48,8 +55,18 @@ const FileUpload = ({
           deviceId: selectedDeviceId ? { exact: selectedDeviceId } : undefined,
         },
       });
-      videoRef.current.srcObject = stream;
-      setCapturing(true);
+
+      // Ensure the video element is available
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      } else {
+        // Handle the case where the video element is not ready
+        console.error("Video element is not available yet.");
+        alert(
+          "An issue occurred while accessing the camera. Please try again."
+        );
+        stream.getTracks().forEach((track) => track.stop()); // Stop the stream
+      }
     } catch (error) {
       if (error.name === "NotAllowedError") {
         alert(
@@ -66,9 +83,7 @@ const FileUpload = ({
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
     if (files.length + uploadedImages.length > maxFilesPerCategory) {
-      //   dispatchErrorToast(
-      //     You can only upload up to ${maxFilesPerCategory} files.
-      //   );
+      // Handle max file limit
       return;
     }
   };
@@ -97,7 +112,7 @@ const FileUpload = ({
   };
 
   const closeCamera = () => {
-    if (videoRef.current.srcObject) {
+    if (videoRef.current && videoRef.current.srcObject) {
       videoRef.current.srcObject.getTracks().forEach((track) => track.stop());
     }
     setCapturing(false);
@@ -135,7 +150,7 @@ const FileUpload = ({
           {/* Camera capture UI */}
           {!capturing && !capturedImage && isEdit && (
             <div className={styles.cameraUpload}>
-              <button onClick={startCapture}>
+              <button onClick={() => setCapturing(true)}>
                 <MdOutlineCameraAlt /> Capture using Camera
               </button>
             </div>
@@ -153,7 +168,7 @@ const FileUpload = ({
               <MdOutlineCameraAlt size={16} /> Capture Photo
             </button>
           </div>
-          <canvas ref={canvasRef} />
+          <canvas ref={canvasRef} style={{ display: "none" }} />
         </div>
       )}
       {capturedImage && !capturing && (
@@ -165,7 +180,10 @@ const FileUpload = ({
             style={{ transform: `rotate(${rotation}deg)` }} // Apply rotation
           />
           <div className={styles.captureActions}>
-            <button className={styles.retake} onClick={startCapture}>
+            <button
+              className={styles.retake}
+              onClick={() => setCapturing(true)}
+            >
               <CiRedo size={16} /> Retake
             </button>
             <button className={styles.rotate} onClick={rotateImage}>
