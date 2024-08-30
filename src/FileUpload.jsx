@@ -49,6 +49,26 @@ const FileUpload = ({
     });
     videoRef.current.srcObject = stream;
   };
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length + uploadedImages.length > maxFilesPerCategory) {
+      //   dispatchErrorToast(
+      //     You can only upload up to ${maxFilesPerCategory} files.
+      //   );
+      return;
+    }
+  };
+
+  const dataURLtoFile = (dataurl, filename) => {
+    const [header, data] = dataurl.split(",");
+    const mime = header.match(/:(.*?);/)[1];
+    const binary = atob(data);
+    const array = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+      array[i] = binary.charCodeAt(i);
+    }
+    return new File([array], filename, { type: mime });
+  };
 
   const capturePhoto = () => {
     const video = videoRef.current;
